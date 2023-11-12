@@ -1,26 +1,40 @@
 /*jslint node: true */
 "use strict";
 
-
+var axios = require('axios');
 var soap = require('soap');
 var express = require('express');
 var fs = require('fs');
 
 // the splitter function, used by the service
-function getFlights(args) {
-  return {
-      Flight: [
-          {
-              airport_origin: { _id: "1", airport_origin_name: "Aeropuerto A" },
-              airport_destination: { _id: "2", airport_destino_name: "Aeropuerto B" },
-              flight_airline: "Airline X",
-              flight_seat_class: "Economy",
-              flight_escalas: [],
-              flight_available_seats: 100,
-              flight_ticket_price: 500.00
+async function getFlights(args) {
+  let apiGatewayUrl = 'http://localhost:5000/graphql';
+  let graphqlQuery = {
+    query: `
+        query {
+          getFlights {
+            airport_origin {
+              airport_origin_name
+            }
+            airport_destination {
+              airport_destino_name
+            }
+            flight_airline
+            flight_escalas {
+              airport_name
+            }
+            flight_seat_class
+            flight_available_seats
+            flight_ticket_price
           }
-          // ... más vuelos según sea necesario
-      ]
+        }`
+  };
+
+  let response = await axios.post(apiGatewayUrl, graphqlQuery);
+  console.log(response.data.data.getFlights);
+
+  return {
+    Flight: response.data.data.getFlights
   };
 }
 
@@ -28,9 +42,9 @@ function getFlights(args) {
 // the service
 var serviceObject = {
   FlightService: {
-      FlightServiceSoapPort: {
-          GetFlights: getFlights
-      }
+    FlightServiceSoapPort: {
+      GetFlights: getFlights
+    }
   }
 };
 
@@ -51,5 +65,5 @@ app.listen(port, function () {
   console.log('Listening on port ' + port);
   var wsdl_path = "/wsdl";
   soap.listen(app, wsdl_path, serviceObject, xml);
-  console.log("Check http://localhost:" + port + wsdl_path +"?wsdl to see if the service is working");
+  console.log("Check http://localhost:" + port + wsdl_path + "?wsdl to see if the service is working");
 });
