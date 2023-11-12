@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- <definitions> must be the root of the WSDL document -->
 <wsdl:definitions targetNamespace="http://tempuri.org/" 
   xmlns:s="http://www.w3.org/2001/XMLSchema" 
   xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" 
@@ -10,46 +9,81 @@
   xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" 
   xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" 
   xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-  <!-- WSDL TYPES: definition of the data types that are used in the web service -->
+
+  <!-- Definición de Tipos -->
   <wsdl:types>
     <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
-      <s:element name="MessageSplitterRequest">
+      
+      <!-- Tipo Complejo para Escala -->
+      <s:complexType name="FlightEscala">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="airport_name" type="s:string"/>
+        </s:sequence>
+      </s:complexType>
+
+      <!-- Tipo Complejo para Aeropuerto de Origen -->
+      <s:complexType name="FlightAirportOrigin">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="_id" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="airport_origin_name" type="s:string"/>
+        </s:sequence>
+      </s:complexType>
+
+      <!-- Tipo Complejo para Aeropuerto de Destino -->
+      <s:complexType name="FlightAirportDestination">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="_id" type="s:string"/>
+          <s:element minOccurs="1" maxOccurs="1" name="airport_destino_name" type="s:string"/>
+        </s:sequence>
+      </s:complexType>
+
+      <!-- Tipo Complejo para Vuelo -->
+      <s:complexType name="Flight">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="airport_origin" type="tns:FlightAirportOrigin"/>
+          <s:element minOccurs="1" maxOccurs="1" name="airport_destination" type="tns:FlightAirportDestination"/>
+          <s:element minOccurs="1" maxOccurs="1" name="flight_airline" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="1" name="flight_seat_class" type="s:string"/>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="flight_escalas" type="tns:FlightEscala"/>
+          <s:element minOccurs="1" maxOccurs="1" name="flight_available_seats" type="s:int"/>
+          <s:element minOccurs="1" maxOccurs="1" name="flight_ticket_price" type="s:float"/>
+        </s:sequence>
+      </s:complexType>
+
+      <!-- Mensajes para la Operación de Obtener Vuelos -->
+      <s:element name="GetFlightsRequest"/>
+      <s:element name="GetFlightsResponse">
         <s:complexType>
           <s:sequence>
-            <s:element minOccurs="1" maxOccurs="1" name="message" type="s:string"/>
-            <s:element minOccurs="1" maxOccurs="1" name="splitter" type="s:string"/>
+            <s:element minOccurs="0" maxOccurs="unbounded" name="Flight" type="tns:Flight"/>
           </s:sequence>
         </s:complexType>
       </s:element>
-      <s:element name="MessageSplitterResponse">
-        <s:complexType>
-          <s:sequence>
-            <s:element minOccurs="1" maxOccurs="unbounded" name="result" type="s:string"/>
-          </s:sequence>
-        </s:complexType>
-      </s:element>
+
     </s:schema>
   </wsdl:types>
-  <!-- MESSAGES: defines the data being exchanged between the service and client -->
-  <wsdl:message name="MessageSplitterSoapIn">
-    <wsdl:part name="parameters" element="tns:MessageSplitterRequest"/>
+
+  <!-- Mensajes SOAP -->
+  <wsdl:message name="GetFlightsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetFlightsRequest"/>
   </wsdl:message>
-  <wsdl:message name="MessageSplitterSoapOut">
-    <wsdl:part name="parameters" element="tns:MessageSplitterResponse"/>
+  <wsdl:message name="GetFlightsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetFlightsResponse"/>
   </wsdl:message>
-  <!-- PORT TYPES: defines the complete communication operation (one way/round trip) -->
-  <wsdl:portType name="MessageSplitterSoapPort">
-    <!-- The operation name must be the same as the one specified in the service object -->
-    <wsdl:operation name="MessageSplitter">
-      <wsdl:input message="tns:MessageSplitterSoapIn"/>
-      <wsdl:output message="tns:MessageSplitterSoapOut"/>
+
+  <!-- Port Types -->
+  <wsdl:portType name="FlightServicePortType">
+    <wsdl:operation name="GetFlights">
+      <wsdl:input message="tns:GetFlightsSoapIn"/>
+      <wsdl:output message="tns:GetFlightsSoapOut"/>
     </wsdl:operation>
   </wsdl:portType>
-  <!-- BINDING: provides details on how a portType operation will actually be transmitted -->
-  <wsdl:binding name="MessageSplitterServiceSoapBinding" type="tns:MessageSplitterSoapPort">
+
+  <!-- Binding -->
+  <wsdl:binding name="FlightServiceSoapBinding" type="tns:FlightServicePortType">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="MessageSplitter">
-      <soap:operation soapAction="MessageSplitter" style="document"/>
+    <wsdl:operation name="GetFlights">
+      <soap:operation soapAction="GetFlights" style="document"/>
       <wsdl:input>
         <soap:body use="literal"/>
       </wsdl:input>
@@ -58,25 +92,12 @@
       </wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
-  <wsdl:binding name="MessageSplitterServiceSoap12Binding" type="tns:MessageSplitterSoapPort">
-    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="MessageSplitter">
-      <soap12:operation soapAction="MessageSplitter" style="document"/>
-      <wsdl:input>
-        <soap12:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:binding>
-  <!-- SERVICE:  -->
-  <wsdl:service name="MessageSplitterService">
-    <wsdl:port name="MessageSplitterServiceSoapPort" binding="tns:MessageSplitterServiceSoapBinding">
+
+  <!-- Servicio SOAP -->
+  <wsdl:service name="FlightService">
+    <wsdl:port name="FlightServiceSoapPort" binding="tns:FlightServiceSoapBinding">
       <soap:address location="http://localhost:8000/wsdl"/>
     </wsdl:port>
-    <wsdl:port name="MessageSplitterServiceSoap12Port" binding="tns:MessageSplitterServiceSoap12Binding">
-      <soap12:address location="http://localhost:8000/wsdl"/>
-    </wsdl:port>
   </wsdl:service>
+
 </wsdl:definitions>
