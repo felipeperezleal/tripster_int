@@ -5,7 +5,7 @@
    ```cmd
     git clone https://github.com/felipeperezleal/tripster_int.git
    ```
-2. Construye la imagen Docker de la base de datos:
+2. Construye la imagen Docker de la interfaz:
    ```cmd
     docker build -t tripster-int .
    ```
