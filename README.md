@@ -1,3 +1,19 @@
+# Tripster Interface
+## Pasos para ejecutar el programa
+
+1. Clona este repositorio:
+   ```cmd
+    git clone https://github.com/felipeperezleal/tripster_int.git
+   ```
+2. Construye la imagen Docker de la base de datos:
+   ```cmd
+    docker build -t tripster-int .
+   ```
+3. Ejecutar el contenedor de Docker de la base de datos:
+   ```cmd
+    docker run --name tripster_int -p 8000:8000 tripster-int
+   ```
+
 # node-soap-example
 A simple SOAP server and client example using the node-soap package and express.
 
