@@ -8,7 +8,7 @@ var fs = require('fs');
 
 // the splitter function, used by the service
 async function getFlights(args) {
-  let apiGatewayUrl = 'http://localhost:5000/graphql';
+  let apiGatewayUrl = 'http://host.docker.internal:5000/graphql';
   let graphqlQuery = {
     query: `
         query {
